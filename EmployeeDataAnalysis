@@ -1,0 +1,247 @@
+> library(readr)
+> library(dplyr)
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+> library(ggplot2)
+> library(stats)
+> library(tidry)
+Error in library(tidry) : there is no package called ‘tidry’
+> library(tidyr)
+> Employees <- read_csv('EmployeeData.csv')
+Parsed with column specification:
+cols(
+  ID = col_double(),
+  Gender = col_character(),
+  `Birth Date` = col_character(),
+  Jobcat = col_double(),
+  Salary = col_character(),
+  `Job Time` = col_double(),
+  `Prev Exp` = col_double(),
+  Minority = col_double()
+)
+> Employees <- Employees %>%
++     mutate(Sal = gsub('\\$', '', Salary))
+> Employees <- Employees %>%
++     mutate(Salaries = as.numeric(gsub('\\,', '', Sal))) %>%
++     select(-Sal, -Salary)
+> View(Employees)
+> MaleSalaries <- Employees %>%
++     filter(Gender == 'm') %>%
++     pull(Salaries)
+> FemaleSalaries <- Employees %>%
++     filter(Gender == 'f') %>%
++     pull(Salaries)
+> SampleTest <- t.test(MaleSalaries, FemaleSalaries)
+> SampleTest
+
+	Welch Two Sample t-test
+
+data:  MaleSalaries and FemaleSalaries
+t = 11.688, df = 344.26, p-value < 2.2e-16
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ 12816.73 18003.00
+sample estimates:
+mean of x mean of y 
+ 41441.78  26031.92 
+
+> # reject null hypothesis 
+> #maybe
+> Employee_mean <- mean(Employees)
+Warning message:
+In mean.default(Employees) :
+  argument is not numeric or logical: returning NA
+> Salary_mean <- mean(Employees$Salaries)
+> Salary_mean
+[1] 34419.57
+> OneSample_men <- t.test(MaleSalaries, mu = 34420)
+> OneSample_men
+
+	One Sample t-test
+
+data:  MaleSalaries
+t = 5.7842, df = 257, p-value = 2.11e-08
+alternative hypothesis: true mean is not equal to 34420
+95 percent confidence interval:
+ 39051.19 43832.37
+sample estimates:
+mean of x 
+ 41441.78 
+
+> OneSample_women <- t.test(FemaleSalaries, mu = 34420)
+> OneSample_women
+
+	One Sample t-test
+
+data:  FemaleSalaries
+t = -16.311, df = 215, p-value < 2.2e-16
+alternative hypothesis: true mean is not equal to 34420
+95 percent confidence interval:
+ 25018.29 27045.55
+sample estimates:
+mean of x 
+ 26031.92 
+
+> Categor_correlation <- cor(Employees$Salaries~Employees$Jobcat)
+Error in cor(Employees$Salaries ~ Employees$Jobcat) : 
+  supply both 'x' and 'y' or a matrix-like 'x'
+> Categor_correlation <- cor(Employees$Salaries,Employees$Jobcat)
+> Categor_correlation
+[1] 0.7801149
+> Regression <- lm(formula = Employees$Salaries ~ Employees$Jobcat + Employees$`Job Time` + Employees$`Prev Exp`)
+> summary(Regression)
+
+Call:
+lm(formula = Employees$Salaries ~ Employees$Jobcat + Employees$`Job Time` + 
+    Employees$`Prev Exp`)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-27644  -5873  -1225   4536  73351 
+
+Coefficients:
+                      Estimate Std. Error t value Pr(>|t|)    
+(Intercept)           1074.526   3966.704   0.271  0.78660    
+Employees$Jobcat     17422.435    615.361  28.313  < 2e-16 ***
+Employees$`Job Time`   136.332     47.199   2.888  0.00405 ** 
+Employees$`Prev Exp`   -24.021      4.549  -5.280 1.98e-07 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 10330 on 470 degrees of freedom
+Multiple R-squared:  0.6365,	Adjusted R-squared:  0.6342 
+F-statistic: 274.4 on 3 and 470 DF,  p-value: < 2.2e-16
+
+> sd_women <- sd(FemaleSalaries)
+> sd_women
+[1] 7558.021
+> sd_men <- sd(MaleSalaries)
+> sd_men
+[1] 19499.21
+> Regression2 <- lm(formula = Employees$Salaries ~ Employees$Jobcat + Employees$`Job Time`)
+> summary(Regression2)
+
+Call:
+lm(formula = Employees$Salaries ~ Employees$Jobcat + Employees$`Job Time`)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-25180  -5432  -1400   4570  71206 
+
+Coefficients:
+                     Estimate Std. Error t value Pr(>|t|)    
+(Intercept)           -887.39    4060.40  -0.219  0.82710    
+Employees$Jobcat     17218.93     631.43  27.270  < 2e-16 ***
+Employees$`Job Time`   135.67      48.53   2.796  0.00539 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 10620 on 471 degrees of freedom
+Multiple R-squared:  0.615,	Adjusted R-squared:  0.6133 
+F-statistic: 376.1 on 2 and 471 DF,  p-value: < 2.2e-16
+
+> Regression3 <- lm(formula = Employees$Salaries~Employees$Gender + Employees$Jobcat + Employees$`Job Time`)
+> summary(Regression3)
+
+Call:
+lm(formula = Employees$Salaries ~ Employees$Gender + Employees$Jobcat + 
+    Employees$`Job Time`)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-23173  -4899  -1022   3729  71076 
+
+Coefficients:
+                     Estimate Std. Error t value Pr(>|t|)    
+(Intercept)            -536.9     3923.2  -0.137   0.8912    
+Employees$Genderm      6027.4     1024.2   5.885 7.58e-09 ***
+Employees$Jobcat      15752.5      659.0  23.905  < 2e-16 ***
+Employees$`Job Time`    116.4       47.0   2.477   0.0136 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 10260 on 470 degrees of freedom
+Multiple R-squared:  0.6414,	Adjusted R-squared:  0.6391 
+F-statistic: 280.2 on 3 and 470 DF,  p-value: < 2.2e-16
+
+> Regression4 <- lm(formula = Employees$Salaries ~ Employees$Minority + Employees$Jobcat + Employees$`Job Time`)
+> summary(Regression4)
+
+Call:
+lm(formula = Employees$Salaries ~ Employees$Minority + Employees$Jobcat + 
+    Employees$`Job Time`)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-25516  -5560  -1129   4090  70834 
+
+Coefficients:
+                     Estimate Std. Error t value Pr(>|t|)    
+(Intercept)           -418.94    4043.24  -0.104  0.91752    
+Employees$Minority   -2919.54    1186.03  -2.462  0.01419 *  
+Employees$Jobcat     16993.60     634.71  26.774  < 2e-16 ***
+Employees$`Job Time`   141.71      48.33   2.932  0.00353 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 10560 on 470 degrees of freedom
+Multiple R-squared:  0.6199,	Adjusted R-squared:  0.6174 
+F-statistic: 255.5 on 3 and 470 DF,  p-value: < 2.2e-16
+
+> Regression5 <- lm(formula = Employees$Salaries ~ Employees$Minority + Employees$Jobcat + Employees$`Job Time` + Employees$Gender)
+> summary(Regression5)
+
+Call:
+lm(formula = Employees$Salaries ~ Employees$Minority + Employees$Jobcat + 
+    Employees$`Job Time` + Employees$Gender)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-23523  -5181   -992   4080  70563 
+
+Coefficients:
+                     Estimate Std. Error t value Pr(>|t|)    
+(Intercept)            122.96    3884.03   0.032 0.974759    
+Employees$Minority   -3936.46    1150.19  -3.422 0.000675 ***
+Employees$Jobcat     15330.47     663.14  23.118  < 2e-16 ***
+Employees$`Job Time`   123.02      46.51   2.645 0.008444 ** 
+Employees$Genderm     6513.28    1022.64   6.369 4.54e-10 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 10140 on 469 degrees of freedom
+Multiple R-squared:  0.6501,	Adjusted R-squared:  0.6471 
+F-statistic: 217.9 on 4 and 469 DF,  p-value: < 2.2e-16
+
+> Regression5 <- lm(formula = Employees$Salaries ~ Employees$Minority + Employees$Jobcat + Employees$`Job Time`)
+> summary(Regression5)
+
+Call:
+lm(formula = Employees$Salaries ~ Employees$Minority + Employees$Jobcat + 
+    Employees$`Job Time`)
+
+Residuals:
+   Min     1Q Median     3Q    Max 
+-25516  -5560  -1129   4090  70834 
+
+Coefficients:
+                     Estimate Std. Error t value Pr(>|t|)    
+(Intercept)           -418.94    4043.24  -0.104  0.91752    
+Employees$Minority   -2919.54    1186.03  -2.462  0.01419 *  
+Employees$Jobcat     16993.60     634.71  26.774  < 2e-16 ***
+Employees$`Job Time`   141.71      48.33   2.932  0.00353 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 10560 on 470 degrees of freedom
+Multiple R-squared:  0.6199,	Adjusted R-squared:  0.6174 
+F-statistic: 255.5 on 3 and 470 DF,  p-value: < 2.2e-16
