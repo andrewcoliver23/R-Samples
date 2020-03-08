@@ -1,0 +1,14 @@
+#creates a dataframe containing all the values of the IQR of another dataframes column
+> IQR <- Employees %>%
++     filter((Salary >= quantile(Employees$Salary, 0.25)) & (Salary <= quantile(Employees$Salary, 0.75))) %>%
++     transmute(Salary)
+> min(IQR)
+[1] 24000
+> max(IQR)
+[1] 36600
+> quantile(Employees$Salary, 0.25)
+  25% 
+24000 
+> quantile(Employees$Salary, 0.75)
+    75% 
+36937.5
